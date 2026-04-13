@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Microservices App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            background: #f0f0f0;
+        }
+        h1 { color: #333; }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            width: 70%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .note {
+            background: white;
+            padding: 10px 15px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        #status {
+            margin-top: 10px;
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 My Microservices App</h1>
+
+    <h3>Add a Note:</h3>
+    <input type="text" id="noteInput" placeholder="Type your note here..." />
+    <button onclick="addNote()">Add Note</button>
+    <div id="status"></div>
+
+    <h3>All Notes:</h3>
+    <button onclick="loadNotes()">Refresh Notes</button>
+    <div id="notesList"></div>
+
+    <script>
+        async function addNote() {
+            const content = document.getElementById('noteInput').value;
+            if (!content) return;
+            try {
+                await fetch('http://localhost:5000/notes', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({content})
+                });
+                document.getElementById('noteInput').value = '';
+                document.getElementById('status').innerText = '✅ Note saved!';
+                loadNotes();
+            } catch (e) {
+                document.getElementById('status').innerText = '❌ Error saving note';
+            }
+        }
+
+        async function loadNotes() {
+            try {
+                const res = await fetch('http://localhost:5000/notes');
+                const data = await res.json();
+                const list = document.getElementById('notesList');
+                list.innerHTML = data.notes.length === 0
+                    ? '<p>No notes yet. Add one above!</p>'
+                    : data.notes.map(n => 
+                        `<div class="note">${n.id}. ${n.content}</div>`
+                      ).join('');
+            } catch (e) {
+                document.getElementById('notesList').innerText = '❌ Could not load notes';
+            }
+        }
+
+        loadNotes();
+    </script>
+</body>
+</html>
