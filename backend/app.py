@@ -40,6 +40,15 @@ def init_db():
 def home():
     return jsonify({"message": "Backend is running! 🚀"})
 
+@app.route('/health')
+def health():
+    try:
+        conn = get_db()
+        conn.close()
+        return jsonify({"status": "healthy", "database": "connected"}), 200
+    except Exception as e:
+        return jsonify({"status": "unhealthy", "database": "disconnected"}), 500
+
 @app.route('/notes', methods=['GET'])
 def get_notes():
     conn = get_db()
